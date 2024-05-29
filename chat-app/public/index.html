@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="join-container">
+    <h1>Join Chat</h1>
+    <form id="join-form">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="text" id="room" placeholder="Room" required>
+        <button type="submit">Join</button>
+    </form>
+</div>
+<script>
+    document.getElementById('join-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const room = document.getElementById('room').value;
+        window.location.href = `chat.html?username=${username}&room=${room}`;
+    });
+</script>
+</body>
+</html>

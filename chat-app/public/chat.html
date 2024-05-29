@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="chat-container">
+    <div class="sidebar">
+        <h2>Room Info</h2>
+        <p><strong>Username:</strong> <span id="username-display"></span></p>
+        <p><strong>Room:</strong> <span id="room-display"></span></p>
+        <h3>Users</h3>
+        <ul id="users-list"></ul>
+    </div>
+    <div class="chat-box">
+        <div id="chat-window">
+            <div id="output"></div>
+            <div id="feedback"></div>
+        </div>
+        <input id="message" type="text" placeholder="Message">
+        <button id="send">Send</button>
+    </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username');
+    const room = params.get('room');
+
+    document.getElementById('username-display').innerText = username;
+    document.getElementById('room-display').innerText = room;
+
+    document.getElementById('send').addEventListener('click', () => {
+        const message = document.getElementById('message').value;
+        socket.emit('sendMessage', { room, message });
+        document.getElementById('message').value = '';
+    });
+
+    document.getElementById('message').addEventListener('keypress', () => {
+        socket.emit('userIsTyping', { room, username });
+    });
+
+    socket.emit('join', { room, username });
+
+    socket.on('message', (message) => {
+        const output = document.getElementById('output');
+        output.innerHTML += `<p><strong>${message.username}:</strong> ${message.text}</p>`;
+        output.scrollTop = output.scrollHeight;
+    });
+
+    socket.on('userIsTyping', (username) => {
+        const feedback = document.getElementById('feedback');
+        if (username) {
+            feedback.innerHTML = `<p><em>${username} is typing...</em></p>`;
+        } else {
+            feedback.innerHTML = '';
+        }
+    });
+
+    socket.on('roomData', ({ users }) => {
+        const usersList = document.getElementById('users-list');
+        usersList.innerHTML = '';
+        users.forEach(user => {
+            const li = document.createElement('li');
+            li.innerText = user;
+            usersList.appendChild(li);
+        });
+    });
+</script>
+</body>
+</html>
